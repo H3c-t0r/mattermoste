@@ -347,6 +347,7 @@ func NewServer(options ...Option) (*Server, error) {
 
 	emailService, err := email.NewService(email.ServiceConfig{
 		ConfigFn:           s.platform.Config,
+		ClientConfigFn:     s.platform.ClientConfig,
 		LicenseFn:          s.License,
 		TemplatesContainer: s.TemplatesContainer(),
 		UserService:        s.userService,

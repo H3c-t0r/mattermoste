@@ -1,34 +1,51 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {shallow} from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 
-import {redirectUserToDefaultTeam} from 'actions/global_actions';
+import { redirectUserToDefaultTeam } from 'actions/global_actions';
 
 import Confirm from 'components/mfa/confirm';
 
-import {mountWithIntl} from 'tests/helpers/intl-test-helper';
+import { mountWithIntl } from 'tests/helpers/intl-test-helper';
 import Constants from 'utils/constants';
+
+let mockState: any;
 
 jest.mock('actions/global_actions', () => ({
     redirectUserToDefaultTeam: jest.fn(),
 }));
 
+jest.mock('react-redux', () => ({
+    ...jest.requireActual('react-redux') as typeof import('react-redux'),
+    useSelector: (selector: (state: typeof mockState) => unknown) => selector(mockState),
+}));
+
 describe('components/mfa/components/Confirm', () => {
     const originalAddEventListener = document.body.addEventListener;
+
+    mockState = {
+        entities: {
+            general: {
+                config: {
+                    EnableCustomBrand: 'false',
+                },
+            },
+        },
+    };
 
     afterAll(() => {
         document.body.addEventListener = originalAddEventListener;
     });
 
     test('should match snapshot', () => {
-        const wrapper = shallow(<Confirm/>);
+        const wrapper = shallow(<Confirm />);
         expect(wrapper).toMatchSnapshot();
     });
 
     test('should submit on form submit', () => {
-        const wrapper = mountWithIntl(<Confirm/>);
+        const wrapper = mountWithIntl(<Confirm />);
         wrapper.find('form').simulate('submit');
 
         expect(redirectUserToDefaultTeam).toHaveBeenCalled();
@@ -42,7 +59,7 @@ describe('components/mfa/components/Confirm', () => {
             map[event] = callback;
         });
 
-        mountWithIntl(<Confirm/>);
+        mountWithIntl(<Confirm />);
 
         const event = {
             preventDefault: jest.fn(),
