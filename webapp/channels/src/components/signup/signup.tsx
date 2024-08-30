@@ -32,6 +32,9 @@ import type {ModeType, AlertBannerProps} from 'components/alert_banner';
 import useCWSAvailabilityCheck, {CSWAvailabilityCheckTypes} from 'components/common/hooks/useCWSAvailabilityCheck';
 import LaptopAlertSVG from 'components/common/svg_images_components/laptop_alert_svg';
 import ManWithLaptopSVG from 'components/common/svg_images_components/man_with_laptop_svg';
+import BrandedBody from 'components/custom_branding/branded_body';
+import BrandedButton from 'components/custom_branding/branded_button';
+import LoginSignupBlock from 'components/custom_branding/login_signup_block';
 import DesktopAuthToken from 'components/desktop_auth_token';
 import ExternalLink from 'components/external_link';
 import ExternalLoginButton from 'components/external_login_button/external_login_button';
@@ -97,7 +100,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
         SamlLoginButtonText,
         LdapLoginFieldName,
         SiteName,
-        CustomDescriptionText,
+        CustomBrandHasBrand,
         GitLabButtonText,
         GitLabButtonColor,
         OpenIdButtonText,
@@ -386,10 +389,6 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
     };
 
     const getCardTitle = () => {
-        if (CustomDescriptionText) {
-            return CustomDescriptionText;
-        }
-
         if (!enableSignUpWithEmail && enableExternalSignup) {
             return formatMessage({id: 'signup_user_completed.cardtitle.external', defaultMessage: 'Create your account with one of the following:'});
         }
@@ -770,7 +769,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
                         },
                     )}
                 >
-                    {enableCustomBrand && !brandImageError ? (
+                    {enableCustomBrand && CustomBrandHasBrand === 'true' && !brandImageError ? (
                         <img
                             className={classNames('signup-body-custom-branding-image')}
                             alt='brand image'
@@ -778,10 +777,11 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
                             onError={handleBrandImageError}
                         />
                     ) : (
-                        <h1 className='signup-body-message-title'>
-                            {formatMessage({id: 'signup_user_completed.title', defaultMessage: 'Let’s get started'})}
-                        </h1>
+                        <div/>
                     )}
+                    <h1 className='signup-body-message-title'>
+                        {formatMessage({id: 'signup_user_completed.title', defaultMessage: 'Let’s get started'})}
+                    </h1>
                     {getMessageSubtitle()}
                     {!enableCustomBrand && (
                         <div className='signup-body-message-svg'>
@@ -791,7 +791,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
                 </div>
                 <div className='signup-body-action'>
                     {!isMobileView && getAlternateLink()}
-                    <div className={classNames('signup-body-card', {'custom-branding': enableCustomBrand, 'with-error': hasError})}>
+                    <LoginSignupBlock className={classNames('signup-body-card', {'custom-branding': enableCustomBrand, 'with-error': hasError})}>
                         <div
                             className='signup-body-card-content'
                             onKeyDown={onEnterKeyDown}
@@ -863,14 +863,16 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
                                         onBlur={(e) => handleOnBlur(e, 'password')}
                                     />
                                     {getNewsletterCheck()}
-                                    <SaveButton
-                                        extraClasses='signup-body-card-form-button-submit large'
-                                        saving={isWaiting}
-                                        disabled={!canSubmit}
-                                        onClick={handleSubmit}
-                                        defaultMessage={formatMessage({id: 'signup_user_completed.create', defaultMessage: 'Create account'})}
-                                        savingMessage={formatMessage({id: 'signup_user_completed.saving', defaultMessage: 'Creating account…'})}
-                                    />
+                                    <BrandedButton>
+                                        <SaveButton
+                                            extraClasses='signup-body-card-form-button-submit large'
+                                            saving={isWaiting}
+                                            disabled={!canSubmit}
+                                            onClick={handleSubmit}
+                                            defaultMessage={formatMessage({id: 'signup_user_completed.create', defaultMessage: 'Create account'})}
+                                            savingMessage={formatMessage({id: 'signup_user_completed.saving', defaultMessage: 'Creating account…'})}
+                                        />
+                                    </BrandedButton>
                                 </div>
                             )}
                             {enableSignUpWithEmail && enableExternalSignup && (
@@ -905,7 +907,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
                                 </p>
                             )}
                         </div>
-                    </div>
+                    </LoginSignupBlock>
                 </div>
             </>
         );
@@ -913,9 +915,9 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
 
     return (
         <div className='signup-body'>
-            <div className='signup-body-content'>
+            <BrandedBody className='signup-body-content'>
                 {getContent()}
-            </div>
+            </BrandedBody>
         </div>
     );
 };

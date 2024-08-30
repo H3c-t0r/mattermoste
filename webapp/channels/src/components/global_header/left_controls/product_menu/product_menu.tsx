@@ -1,17 +1,21 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useRef} from 'react';
-import {useIntl} from 'react-intl';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useRef, useMemo } from 'react';
+import { useIntl } from 'react-intl';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import tinycolor from 'tinycolor2';
 
 import IconButton from '@mattermost/compass-components/components/icon-button'; // eslint-disable-line no-restricted-imports
 
-import {getLicense} from 'mattermost-redux/selectors/entities/general';
+import { Client4 } from 'mattermost-redux/client';
+import { getConfig, getLicense } from 'mattermost-redux/selectors/entities/general';
+import { getInt, getTheme } from 'mattermost-redux/selectors/entities/preferences';
+import { getCurrentUserId } from 'mattermost-redux/selectors/entities/users';
 
-import {setProductMenuSwitcherOpen} from 'actions/views/product_menu';
-import {isSwitcherOpen} from 'selectors/views/product_menu';
+import { setProductMenuSwitcherOpen } from 'actions/views/product_menu';
+import { isSwitcherOpen } from 'selectors/views/product_menu';
 
 import {
     OnboardingTaskCategory,
@@ -22,14 +26,14 @@ import {
 import Menu from 'components/widgets/menu/menu';
 import MenuWrapper from 'components/widgets/menu/menu_wrapper';
 
-import {useCurrentProductId, useProducts, isChannels} from 'utils/products';
+import { useCurrentProductId, useProducts, isChannels } from 'utils/products';
 
 import ProductBranding from './product_branding';
 import ProductBrandingTeamEdition from './product_branding_team_edition';
 import ProductMenuItem from './product_menu_item';
 import ProductMenuList from './product_menu_list';
 
-import {useClickOutsideRef} from '../../hooks';
+import { useClickOutsideRef } from '../../hooks';
 
 export const ProductMenuContainer = styled.nav`
     display: flex;
@@ -49,7 +53,7 @@ export const ProductMenuButton = styled(IconButton).attrs(() => ({
     // we currently need this, since not passing a onClick handler is disabling the IconButton
     // this is a known issue and is being tracked by UI platform team
     // TODO@UI: remove the onClick, when it is not a mandatory prop anymore
-    onClick: () => {},
+    onClick: () => { },
     inverted: true,
     compact: true,
 }))`
@@ -60,13 +64,16 @@ export const ProductMenuButton = styled(IconButton).attrs(() => ({
 `;
 
 const ProductMenu = (): JSX.Element => {
-    const {formatMessage} = useIntl();
+    const { formatMessage } = useIntl();
     const products = useProducts();
     const dispatch = useDispatch();
     const switcherOpen = useSelector(isSwitcherOpen);
     const menuRef = useRef<HTMLDivElement>(null);
     const currentProductID = useCurrentProductId();
     const license = useSelector(getLicense);
+    const { EnableCustomBrand, CustomBrandHasLogo } = useSelector(getConfig);
+
+    const theme = useSelector(getTheme);
 
     const handleClick = () => dispatch(setProductMenuSwitcherOpen(!switcherOpen));
 
@@ -85,6 +92,10 @@ const ProductMenu = (): JSX.Element => {
         }
         dispatch(setProductMenuSwitcherOpen(false));
     });
+
+    const useDarkLogo = useMemo(() => {
+        return tinycolor(theme.sidebarHeaderBg).isDark();
+    }, [theme.sidebarHeaderBg]);
 
     const productItems = products?.map((product) => {
         let tourTip;
@@ -112,11 +123,17 @@ const ProductMenu = (): JSX.Element => {
                     <ProductMenuButton
                         active={switcherOpen}
                         aria-expanded={switcherOpen}
-                        aria-label={formatMessage({id: 'global_header.productSwitchMenu', defaultMessage: 'Product switch menu'})}
+                        aria-label={formatMessage({ id: 'global_header.productSwitchMenu', defaultMessage: 'Product switch menu' })}
                         aria-controls='product-switcher-menu'
                     />
-                    {license.IsLicensed === 'false' && <ProductBrandingTeamEdition/>}
-                    {license.IsLicensed === 'true' && <ProductBranding/>}
+                    {license.IsLicensed === 'false' && <ProductBrandingTeamEdition />}
+                    {license.IsLicensed === 'true' && EnableCustomBrand === 'true' && CustomBrandHasLogo === 'true' && (
+                        <img
+                            src={useDarkLogo ? Client4.getCustomDarkLogoUrl('0') : Client4.getCustomLightLogoUrl('0')}
+                            height={24}
+                        />
+                    )}
+                    {license.IsLicensed === 'true' && (EnableCustomBrand !== 'true' || CustomBrandHasLogo !== 'true') && <ProductBranding />}
                 </ProductMenuContainer>
                 <Menu
                     listId={'product-switcher-menu-dropdown'}
