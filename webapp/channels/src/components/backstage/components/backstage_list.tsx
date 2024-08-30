@@ -23,6 +23,7 @@ type Props = {
     addButtonId?: string;
     emptyText?: ReactNode;
     emptyTextSearch?: JSX.Element;
+    hintText?: ReactNode;
     helpText?: ReactNode;
     loading: boolean;
     searchPlaceholder?: string;
@@ -159,6 +160,9 @@ const BackstageList = ({searchPlaceholder = localizeMessage('backstage_list.sear
                     />
                 </div>
             </div>
+            <span className='backstage-list__hint'>
+                {remainingProps.hintText}
+            </span>
             <span className='backstage-list__help'>
                 {remainingProps.helpText}
             </span>
