@@ -83,12 +83,38 @@ func TestGetPing(t *testing.T) {
 		require.Contains(t, respString, "testvalue")
 	}, "ping feature flag test")
 
+	t.Run("ping root_status test", func(t *testing.T) {
+		if os.Geteuid() != 0 {
+			t.Skip("Skipping due to system user not having root privileges")
+		}
+		resp, err := th.SystemAdminClient.DoAPIGet(context.Background(), "/system/ping?get_server_status=true", "")
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		var respMap map[string]any
+		err = json.NewDecoder(resp.Body).Decode(&respMap)
+		require.NoError(t, err)
+		root_status, ok := respMap["root_status"]
+		assert.Equal(t, true, ok)
+		assert.Equal(t, true, root_status)
+	})
+
+	t.Run("ping root_status test with client user", func(t *testing.T) {
+		resp, err := th.Client.DoAPIGet(context.Background(), "/system/ping?get_server_status=true", "")
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		var respMap map[string]any
+		err = json.NewDecoder(resp.Body).Decode(&respMap)
+		require.NoError(t, err)
+		_, ok := respMap["root_status"]
+		assert.Equal(t, false, ok)
+	})
+
 	th.TestForAllClients(t, func(t *testing.T, client *model.Client4) {
 		th.App.ReloadConfig()
 		resp, err := client.DoAPIGet(context.Background(), "/system/ping?device_id=platform:id", "")
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, resp.StatusCode)
-		var respMap map[string]string
+		var respMap map[string]any
 		err = json.NewDecoder(resp.Body).Decode(&respMap)
 		require.NoError(t, err)
 		assert.Equal(t, "unknown", respMap["CanReceiveNotifications"]) // Unrecognized platform
