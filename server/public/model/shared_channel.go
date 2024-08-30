@@ -275,6 +275,7 @@ type SyncMsg struct {
 	Users     map[string]*User `json:"users,omitempty"`
 	Posts     []*Post          `json:"posts,omitempty"`
 	Reactions []*Reaction      `json:"reactions,omitempty"`
+	Statuses  []*Status        `json:"statuses,omitempty"`
 }
 
 func NewSyncMsg(channelID string) *SyncMsg {
