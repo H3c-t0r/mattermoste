@@ -4,17 +4,12 @@
 import React from 'react';
 import {FormattedMessage} from 'react-intl';
 
-import type {ChannelNotifyProps} from '@mattermost/types/channels';
-import type {UserNotifyProps} from '@mattermost/types/users';
-
 import type {FieldsetCheckbox} from 'components/widgets/modals/components/checkbox_setting_item';
 import type {FieldsetRadio} from 'components/widgets/modals/components/radio_setting_item';
 import type {FieldsetReactSelect} from 'components/widgets/modals/components/react_select_item';
 
-import {DesktopSound, NotificationLevels} from 'utils/constants';
+import {NotificationLevels} from 'utils/constants';
 import {optionsOfMessageNotificationSoundsSelect} from 'utils/notification_sounds';
-
-export type ChannelMemberNotifyProps = Partial<ChannelNotifyProps> & Pick<UserNotifyProps, 'desktop_threads' | 'push_threads'>
 
 const MuteChannelInputFieldData: FieldsetCheckbox = {
     name: 'mute channel',
@@ -173,23 +168,7 @@ export const mobileNotificationInputFieldData = (defaultOption: string): Fieldse
     };
 };
 
-/**
- * This conversion is needed because User's preference for desktop sound is stored as either true or false. On the other hand,
- * Channel's specific desktop sound is stored as either On or Off.
- */
-export function convertDesktopSoundNotifyPropFromUserToDesktop(userNotifyDesktopSound?: UserNotifyProps['desktop_sound']) {
-    if (!userNotifyDesktopSound) {
-        return DesktopSound.OFF;
-    }
-
-    if (userNotifyDesktopSound === 'true') {
-        return DesktopSound.ON;
-    }
-
-    return DesktopSound.ON;
-}
-
-const utils = {
+export default {
     desktopNotificationInputFieldData,
     desktopNotificationSoundsCheckboxFieldData,
     desktopNotificationSoundsSelectFieldData,
@@ -201,5 +180,3 @@ const utils = {
     AutoFollowThreadsInputFieldData,
     sameMobileSettingsDesktopInputFieldData,
 };
-
-export default utils;
